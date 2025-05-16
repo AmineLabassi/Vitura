@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g `sdl-config --cflags`
-LDFLAGS = `sdl-config --libs` -lSDL_image -lSDL_ttf
+LDFLAGS = `sdl-config --libs` -lSDL_image -lSDL_ttf -lSDL_mixer
 
 SRC = main.c background.c
 TARGET = game

@@ -1,3 +1,9 @@
+/**
+ * @file background.c
+ * @brief Gestion du background, de la musique, du temps et de l'animation dans le jeu SDL.
+ * @author Vitura
+ * @date 10 mai 2025
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
@@ -5,6 +11,11 @@
 #include <SDL/SDL_mixer.h>
 #include <SDL/SDL_ttf.h>
 #include "background.h"
+/**
+ * @brief Initialise le background (image de fond).
+ * @param b Pointeur vers la structure background.
+ * @return 1 si succès, 0 sinon.
+ */
 
 int initBack(background *b) {
     b->img = IMG_Load("bg1.jpg");
@@ -19,6 +30,12 @@ int initBack(background *b) {
     b->start_time = 0;
     return 1;
 }
+
+/**
+ * @brief Affiche le background sur l'écran.
+ * @param b Structure background.
+ * @param screen Surface SDL de l'écran.
+ */
 
 void afficherBack(background b, SDL_Surface *screen) {
     SDL_BlitSurface(b.img, &b.img_size, screen, &b.img_pos);
@@ -38,6 +55,11 @@ int musicLoad1(Mix_Music **music) {
     Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
     return 1;
 }
+/**
+ * @brief Charge et joue la musique de fond.
+ * @param music Pointeur vers un pointeur de musique SDL.
+ * @return 1 si succès, 0 sinon.
+ */
 
 void scrolling(background *b, int direction, int dx, int dy) {
     SDL_Rect nvpos = b->img_size;
@@ -55,6 +77,13 @@ void scrolling(background *b, int direction, int dx, int dy) {
 
     b->img_size = nvpos;
 }
+/**
+ * @brief Gère le scrolling du background.
+ * @param b Pointeur vers la structure background.
+ * @param direction Direction du scroll (0: droite, 1: gauche, 2: haut, 3: bas).
+ * @param dx Déplacement horizontal.
+ * @param dy Déplacement vertical.
+ */
 
 int backgroundLoad_lvl1(image *img) {
     img->filename = "bg1.jpg";
@@ -69,11 +98,22 @@ int backgroundLoad_lvl1(image *img) {
     img->img_pos.x = img->img_pos.y = 0;
     return 1;
 }
+/**
+ * @brief Charge le background pour le niveau 1.
+ * @param img Pointeur vers une image.
+ * @return 1 si succès, 0 sinon.
+ */
 
 void backgroundDraw_lvl1(SDL_Surface *screen, image *img) {
     SDL_BlitSurface(img->img, &img->img_size, screen, &img->img_pos);
 }
-
+/**
+ * @brief Affichage en écran scindé pour deux joueurs.
+ * @param screen Surface SDL de l'écran.
+ * @param img Image de fond.
+ * @param cam1 Caméra du joueur 1.
+ * @param cam2 Caméra du joueur 2.
+ */
 void splitScreen(SDL_Surface *screen, image *img, SDL_Rect cam1, SDL_Rect cam2) {
     SDL_Rect left_screen = {0, 0, SCREEN_W / 2, SCREEN_H};
     SDL_Rect right_screen = {SCREEN_W / 2, 0, SCREEN_W / 2, SCREEN_H};
@@ -85,6 +125,12 @@ void splitScreen(SDL_Surface *screen, image *img, SDL_Rect cam1, SDL_Rect cam2) 
     Uint32 line_color = SDL_MapRGB(screen->format, 255, 255, 255);
     SDL_FillRect(screen, &border, line_color);
 }
+/**
+ * @brief Affiche le temps global écoulé depuis le début.
+ * @param start_time Temps de départ (SDL_GetTicks()).
+ * @param screen Surface SDL de l'écran.
+ * @param font Police pour l'affichage du texte.
+ */
 
 
 void afficherTempsGlobal(Uint32 start_time, SDL_Surface *screen, TTF_Font *font) {
@@ -96,11 +142,26 @@ void afficherTempsGlobal(Uint32 start_time, SDL_Surface *screen, TTF_Font *font)
     SDL_BlitSurface(txt, NULL, screen, &txt_rect);
     SDL_FreeSurface(txt);
 }
+/**
+ * @brief Met à jour et affiche le temps de jeu.
+ * @param back Pointeur vers background (contenant start_time).
+ * @param screen Surface SDL de l'écran.
+ * @param font Police utilisée pour l'affichage.
+ */
 
 void update_game_time(background *back, SDL_Surface *screen, TTF_Font *font) {
     if (!back->start_time) back->start_time = SDL_GetTicks();
     afficherTempsGlobal(back->start_time, screen, font);
 }
+
+/**
+ * @brief Met à jour la position de la caméra selon la direction.
+ * @param cam Pointeur vers la SDL_Rect de la caméra.
+ * @param direction Direction du mouvement.
+ * @param img Surface de l'image.
+ * @param dx Déplacement en x.
+ * @param dy Déplacement en y.
+ */
 void update_camera(SDL_Rect *cam, int direction, SDL_Surface *img, int dx, int dy) {
     if (direction == 0) cam->x += dx;
     else if (direction == 1) cam->x -= dx;
@@ -113,7 +174,11 @@ void update_camera(SDL_Rect *cam, int direction, SDL_Surface *img, int dx, int d
     if (cam->y < 0) cam->y = 0;
     if (cam->y + cam->h > img->h) cam->y = img->h - cam->h;
 }
-
+/**
+ * @brief Charge une image à partir d’un fichier.
+ * @param path Chemin vers le fichier image.
+ * @return Surface SDL de l’image chargée ou NULL en cas d’échec.
+ */
 SDL_Surface* loadImage(char *path) {
     SDL_Surface *img = IMG_Load(path);
     if (!img) {
@@ -121,6 +186,11 @@ SDL_Surface* loadImage(char *path) {
     }
     return img;
 }
+/**
+ * @brief Affiche un guide avec une boîte semi-transparente.
+ * @param screen Surface de l’écran.
+ * @param font Police de texte.
+ */
 
 void afficherGuideAvecIcone(SDL_Surface *screen, TTF_Font *font) {
     SDL_Color texte_color = {0, 0, 0};
@@ -151,10 +221,20 @@ void afficherGuideAvecIcone(SDL_Surface *screen, TTF_Font *font) {
         }
     }
 }
+/**
+ * @brief Vérifie si la fin du background a été atteinte.
+ * @param b Pointeur vers le background.
+ * @return 1 si la fin est atteinte, 0 sinon.
+ */
 
 int is_end_of_background(background *b) {
     return (b->img_size.x + SCREEN_W >= b->img->w);
 }
+/**
+ * @brief Initialise l'animation d’un robot.
+ * @param image Pointeur vers background contenant les informations du sprite.
+ */
+
 
 
 // Fonction pour initialiser l'animation du robot
@@ -180,10 +260,21 @@ void init_animerBack(background* image) {
     image->direction = 0;
 }
 
+/**
+ * @brief Affiche une frame de l’animation du robot.
+ * @param image Structure background avec les infos d’animation.
+ * @param screen Surface SDL de l’écran.
+ */
 // Affichage de l'animation du robot
 void afficher_animerBack(background image, SDL_Surface *screen) {
     SDL_BlitSurface(image.img, &image.camera_pos, screen, &image.pos_ecran);
 }
+/**
+ * @brief Met à jour la frame actuelle de l'animation du robot.
+ * @param image Pointeur vers la structure background.
+ * @param frame_width Largeur d’une frame.
+ * @param nb_frames Nombre total de frames.
+ */
 
 // Mise à jour des frames de l'animation
 void update_animation(background *image, int frame_width, int nb_frames) {
