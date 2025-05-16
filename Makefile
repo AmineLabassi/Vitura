@@ -1,6 +1,22 @@
-prog: main.o enigme.o
-	gcc  main.o enigme.o -o prog -lSDL -lSDL_ttf -lSDL_mixer -lSDL_image 
-main.o:main.c
-	gcc -c main.c
-enigme.o:enigme.c
-	gcc -c enigme.c
+# Updated Makefile
+# Compiler and flags
+CC = gcc
+CFLAGS = -Wall -Wextra -g -I/usr/include/SDL
+LDFLAGS = -lSDL -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL_gfx -lm
+
+# Targets
+TARGET = game
+OBJECTS = main.o enigme.o
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+.PHONY: all clean
